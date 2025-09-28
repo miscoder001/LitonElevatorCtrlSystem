@@ -22,6 +22,7 @@ class BluetoothServiceIOS(viewModel: LitonViewModel) : BluetoothService {
     private val _discoveredDevices = MutableStateFlow<List<BluetoothDevice>>(emptyList())
     private val _receivedData = MutableStateFlow<ByteArray?>(null)
 
+
     private val centralDelegate = object : NSObject(), CBCentralManagerDelegateProtocol {
 
         override fun centralManagerDidUpdateState(central: CBCentralManager) {
