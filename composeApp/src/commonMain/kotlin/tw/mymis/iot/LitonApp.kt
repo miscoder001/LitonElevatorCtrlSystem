@@ -1,5 +1,6 @@
 package tw.mymis.iot
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -32,7 +33,7 @@ import tw.mymis.iot.viewmodel.LitonViewModel
 
 /**
  * enum values that represent the screens in the app
- */
+
 enum class LitonScreen(val title: StringResource) {
     Start(title = Res.string.app_name),
     Login(title = Res.string.login),
@@ -40,7 +41,7 @@ enum class LitonScreen(val title: StringResource) {
     Pickup(title = Res.string.choose_pickup_date),
     Summary(title = Res.string.order_summary)
 }
-
+ */
 /**
  * Composable that displays the topBar and displays back button if back navigation is possible.
  */
@@ -82,7 +83,7 @@ fun LitonApp(
     val currentScreen = LitonScreen.valueOf(
         backStackEntry?.destination?.route ?: LitonScreen.Start.name
     )
-
+    val scrollState = rememberScrollState()
     Scaffold(
         topBar = {
             LitonAppBar(
@@ -93,32 +94,9 @@ fun LitonApp(
         }
     ) { innerPadding ->
         val uiState by viewModel.uiState.collectAsState()
-
-        NavHost(
-            navController = navController,
-            startDestination = LitonScreen.Login.name,
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(innerPadding)
-        ) {
-
-//            composable(route = LitonScreen.Start.name) {
-//                SelectOptionScreen(
-//                    subtotal = uiState.price,
-//                    onNextButtonClicked = { navController.navigate(LitonScreen.Login.name) },
-//                    onCancelButtonClicked = {
-//                        cancelOrderAndNavigateToStart(viewModel, navController)
-//                    },
-//                    options = DataSource.flavors.map { id -> stringResource(id) },
-//                    onSelectionChanged = { viewModel.setFlavor(it) },
-//                    modifier = Modifier.fillMaxHeight()
-//                )
-//            }
-            composable(route = LitonScreen.Login.name) {
-                Login()
-            }
-
+        Column()
+        {
+            SetupRoute(navController, viewModel)
         }
     }
 }
@@ -126,17 +104,10 @@ fun LitonApp(
 /**
  * Resets the [OrderUiState] and pops up to [CupcakeScreen.Start]
  */
-private fun cancelOrderAndNavigateToStart(
+private fun Logout(
     viewModel: LitonViewModel,
     navController: NavHostController
 ) {
 
     navController.popBackStack(LitonScreen.Login.name, inclusive = false)
-}
-
-/**
- * Creates an intent to share order details
- */
-private fun shareOrder(subject: String, summary: String) {
-    // TODO
 }

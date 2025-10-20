@@ -17,7 +17,7 @@ class BluetoothServiceIOS(viewModel: LitonViewModel) : BluetoothService {
     private var centralManager: CBCentralManager? = null
     private var peripheral: CBPeripheral? = null
     private var characteristic: CBCharacteristic? = null
-
+    private var isBluetoothEnabled = false
     private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
     private val _discoveredDevices = MutableStateFlow<List<BluetoothDevice>>(emptyList())
     private val _receivedData = MutableStateFlow<ByteArray?>(null)
@@ -25,26 +25,33 @@ class BluetoothServiceIOS(viewModel: LitonViewModel) : BluetoothService {
 
     private val centralDelegate = object : NSObject(), CBCentralManagerDelegateProtocol {
 
+        // 只要 CentralManager 的狀態異動 便會呼叫此method
         override fun centralManagerDidUpdateState(central: CBCentralManager) {
             when (central.state) {
                 CBManagerStatePoweredOn -> {
                     // 藍牙已開啟，可以開始掃描
+                    isBluetoothEnabled = true
+                    //central.scanForPeripheralsWithServices(null,null)
                 }
                 CBManagerStatePoweredOff -> {
                     _connectionState.value = ConnectionState.DISCONNECTED
+                    isBluetoothEnabled = false
                 }
                 else -> {
                     // 處理其他狀態
+                    _connectionState.value = ConnectionState.FAILED
                 }
             }
         }
 
+        // 一但啟動 StartScan 發現任何的裝置便會呼叫此方法
         override fun centralManager(
             central: CBCentralManager,
             didDiscoverPeripheral: CBPeripheral,
             advertisementData: Map<Any?, *>,
             RSSI: NSNumber
-        ) {
+        )
+        {
             val device = BluetoothDevice(
                 name = didDiscoverPeripheral.name,
                 address = didDiscoverPeripheral.identifier.UUIDString,
@@ -61,7 +68,8 @@ class BluetoothServiceIOS(viewModel: LitonViewModel) : BluetoothService {
         override fun centralManager(
             central: CBCentralManager,
             didConnectPeripheral: CBPeripheral
-        ) {
+        )
+        {
             _connectionState.value = ConnectionState.CONNECTED
             peripheral = didConnectPeripheral
             didConnectPeripheral.delegate = peripheralDelegate
@@ -83,7 +91,8 @@ class BluetoothServiceIOS(viewModel: LitonViewModel) : BluetoothService {
         override fun peripheral(
             peripheral: CBPeripheral,
             didDiscoverServices: NSError?
-        ) {
+        )
+        {
             peripheral.services?.forEach { service ->
                 val cbService = service as CBService
                 peripheral.discoverCharacteristics(null, forService = cbService)
@@ -94,7 +103,8 @@ class BluetoothServiceIOS(viewModel: LitonViewModel) : BluetoothService {
             peripheral: CBPeripheral,
             didDiscoverCharacteristicsForService: CBService,
             error: NSError?
-        ) {
+        )
+        {
             didDiscoverCharacteristicsForService.characteristics?.forEach { char ->
                 val cbChar = char as CBCharacteristic
                 if (cbChar.properties.and(CBCharacteristicPropertyNotify.toInt().toULong()).toInt() != 0) {
@@ -128,6 +138,7 @@ class BluetoothServiceIOS(viewModel: LitonViewModel) : BluetoothService {
 
     override fun startDeviceDiscovery(): Flow<BluetoothDevice> = flow {
         if (!isBluetoothEnabled()) {
+            print("Discovery失敗 ！！！")
             throw BluetoothException.BluetoothDisabled
         }
 
@@ -152,6 +163,7 @@ class BluetoothServiceIOS(viewModel: LitonViewModel) : BluetoothService {
 
             targetPeripheral?.let {
                 centralManager?.connectPeripheral(it, null)
+                peripheral = targetPeripheral
                 true
             } ?: false
         } catch (e: Exception) {
@@ -184,6 +196,7 @@ class BluetoothServiceIOS(viewModel: LitonViewModel) : BluetoothService {
     }
 
     override fun receiveData(): Flow<ByteArray> = flow {
+
         _receivedData.collect { data ->
             data?.let { emit(it) }
         }

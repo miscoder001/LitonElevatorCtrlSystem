@@ -30,6 +30,12 @@ class LitonViewModel : ViewModel() {
         observeConnectionState()
     }
 
+    fun cleanDevices() {
+        // val cleanDevice : List<BluetoothDevice> = emptyList()
+        _uiState.value.copy( discoveredDevices = emptyList())
+
+    }
+
     fun startScanning() {
         scope.launch {
             try {
@@ -60,7 +66,16 @@ class LitonViewModel : ViewModel() {
             val success = bluetoothService.connectToDevice(device)
             if (!success) {
                 _uiState.value = _uiState.value.copy(error = "連接失敗")
+            } else {
+                _uiState.value = _uiState.value.copy()
             }
+        }
+    }
+
+    fun disconnectFromDevice() {
+        scope.launch {
+            bluetoothService.disconnectFromDevice()
+
         }
     }
 
