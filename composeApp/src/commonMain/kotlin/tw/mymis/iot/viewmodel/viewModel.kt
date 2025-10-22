@@ -1,10 +1,14 @@
 package tw.mymis.iot.viewmodel
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 
 import kotlinx.coroutines.launch
 import tw.mymis.iot.bluetooth.BluetoothDevice
@@ -21,9 +25,15 @@ class LitonViewModel : ViewModel() {
 
     public lateinit  var context: Any
     public lateinit  var bluetoothService: BluetoothService
+    public lateinit  var bluetoothDevice: BluetoothDevice
+    public lateinit var  receiveData : StateFlow<*>
+    val batteryLevel = mutableStateOf(0)
+    val serviceUUID =  mutableStateOf("")
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Main)
 
     //private val scope: CoroutineScope = CoroutineScope(Dispatchers.Main)
+    public val _periServices = mutableStateListOf<String>()
+    // val periService:  StateFlow<String> = _periServices
     private val _uiState = MutableStateFlow(BluetoothState())
     val uiState: StateFlow<BluetoothState> = _uiState
     init {
@@ -62,12 +72,14 @@ class LitonViewModel : ViewModel() {
     }
 
     fun connectToDevice(device: BluetoothDevice) {
+        _periServices.clear()
         scope.launch {
             val success = bluetoothService.connectToDevice(device)
             if (!success) {
                 _uiState.value = _uiState.value.copy(error = "連接失敗")
             } else {
                 _uiState.value = _uiState.value.copy()
+                bluetoothDevice = device
             }
         }
     }
@@ -77,6 +89,26 @@ class LitonViewModel : ViewModel() {
             bluetoothService.disconnectFromDevice()
 
         }
+    }
+    fun listServices() {
+        scope.launch {
+            bluetoothService.listServiceFromDevice()
+        }
+    }
+
+    fun readDeviceCharacter() {
+        println("--===== 等候資料 ------========")
+        scope.launch {
+
+        }
+    }
+
+    fun fetchCharacteristicByUUID(uuidString : String) {
+        bluetoothService.getCharacteristicByUUID(uuidString)
+    }
+
+    fun processCharData() : Flow<ByteArray> {
+        return bluetoothService.receiveData()
     }
 
     fun sendMessage(message: String) {

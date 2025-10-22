@@ -13,7 +13,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import litonelevatorctrlsystem.composeapp.generated.resources.Res
 import litonelevatorctrlsystem.composeapp.generated.resources.app_name
+import litonelevatorctrlsystem.composeapp.generated.resources.bluetooth_device_detail
 import litonelevatorctrlsystem.composeapp.generated.resources.bluetooth_screen
+import litonelevatorctrlsystem.composeapp.generated.resources.characteristic
 import litonelevatorctrlsystem.composeapp.generated.resources.choose_flavor
 import litonelevatorctrlsystem.composeapp.generated.resources.choose_pickup_date
 import litonelevatorctrlsystem.composeapp.generated.resources.demo_screen
@@ -21,7 +23,9 @@ import litonelevatorctrlsystem.composeapp.generated.resources.login
 import litonelevatorctrlsystem.composeapp.generated.resources.order_summary
 import org.jetbrains.compose.resources.StringResource
 import tw.mymis.iot.screen.BluetoothScreen
+import tw.mymis.iot.screen.CharacteristicsScreen
 import tw.mymis.iot.screen.DemoScreen
+import tw.mymis.iot.screen.DeviceDetailScreen
 import tw.mymis.iot.screen.Login
 import tw.mymis.iot.viewmodel.LitonViewModel
 
@@ -30,7 +34,9 @@ enum class LitonScreen(val title: StringResource) {
     Start(title = Res.string.app_name),
     Login(title = Res.string.login),
     Bluetooth(title = Res.string.bluetooth_screen),
-    Demo(title = Res.string.demo_screen)
+    Demo(title = Res.string.demo_screen),
+    DeviceInfo(title = Res.string.bluetooth_device_detail),
+    CharaInfo(Res.string.characteristic)
 }
 
 
@@ -69,8 +75,12 @@ fun SetupRoute(navController: NavHostController, viewModel: LitonViewModel) {
             DemoScreen(navController, viewModel)
         }
 
+        composable(route = LitonScreen.DeviceInfo.name) {
+            DeviceDetailScreen(navController,viewModel )
+        }
 
-
-
+        composable(route = LitonScreen.CharaInfo.name) {
+            CharacteristicsScreen(navController, viewModel)
+        }
     }
 }

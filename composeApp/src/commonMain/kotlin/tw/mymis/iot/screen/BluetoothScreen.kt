@@ -1,5 +1,8 @@
 package tw.mymis.iot.screen
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -41,91 +45,103 @@ fun BluetoothScreen(viewModel: LitonViewModel, navController: NavHostController)
     val uiState by viewModel.uiState.collectAsState()
     val scrllState = rememberScrollState()
 
-
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-
-            .padding(top = 16.dp, start = 10.dp, end = 10.dp)
-    ) {
-        // 連接狀態顯示
-        ConnectionStatusCard(uiState.connectionState)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 控制按鈕
+            .fillMaxSize()
+            //.padding(top = 16.dp, start = 10.dp, end = 10.dp)
+            .background(color = Color.Cyan),
+        verticalArrangement = Arrangement.spacedBy(5.dp)
+    )
+    {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            ConnectionStatusCard(uiState.connectionState)
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Button(
-                onClick = {
-                    if (uiState.isScanning) {
-                        viewModel.stopScanning()
-                    } else {
-                        viewModel.startScanning()
-                    }
-                }
-            ) {
-                Text(if (uiState.isScanning) "停止掃描" else "開始掃描")
-            }
+        )
+        {
 
-            Button(
-                onClick = { viewModel.disconnectFromDevice()},
-                //onClick = { viewModel.disconnectFromDevice() },
-                enabled = uiState.connectionState == ConnectionState.CONNECTED
-            ) {
-                Text("斷開連接")
-            }
-            Button(
-                onClick = {
-                    viewModel.uiState.value.copy( connectionState = ConnectionState.EMPTY )
-                    viewModel.cleanDevices() },
-            ) {
-                Text( text = "登出")
-            }
-            Button(
-                onClick = {
-                    navController.navigate(LitonScreen.Login.name)
-                }
-            ) {
-                Text("登入")
-            }
-        }
+                //Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 設備列表
-        Text("發現的設備:", style = MaterialTheme.typography.headlineSmall)
-      //  if (uiState.discoveredDevices.isNotEmpty()) {
-
-                LazyColumn {
-                    items(uiState.discoveredDevices) { device ->
-                        if( device.name != null ) {
-                            DeviceItem(
-                                device = device,
-                                onDeviceClick = { viewModel.connectToDevice(device) }
-                            )
-                            HorizontalDivider(thickness = 2.dp, color = Color.Red)
+                    Button(
+                        onClick = {
+                            if (uiState.isScanning) {
+                                viewModel.stopScanning()
+                            } else {
+                                viewModel.startScanning()
+                            }
                         }
+                    ) {
+                        Text(if (uiState.isScanning) "停止掃描" else "開始掃描")
+                    }
+
+                    Button(
+                        onClick = { viewModel.disconnectFromDevice() },
+                        //onClick = { viewModel.disconnectFromDevice() },
+                        enabled = uiState.connectionState == ConnectionState.CONNECTED
+                    ) {
+                        Text("斷開連接")
+                    }
+                    Button(
+                        onClick = {
+                            viewModel.uiState.value.copy(connectionState = ConnectionState.EMPTY)
+                            viewModel.cleanDevices()
+                        },
+                    ) {
+                        Text(text = "登出")
+                    }
+                    Button(
+                        onClick = {
+                            navController.navigate(LitonScreen.Login.name)
+                        }
+                    ) {
+                        Text("登入")
+                    }
+
+
+        }
+
+
+    //    Spacer(modifier = Modifier.height(16.dp))
+        Text("發現的設備:", style = MaterialTheme.typography.headlineSmall)
+        Text( text="---------------------------------------")
+        if (uiState.discoveredDevices.isNotEmpty()) {
+        Row( modifier = Modifier.fillMaxWidth().height(450.dp))
+        {
+            // 設備列表
+            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                items(uiState.discoveredDevices) { device ->
+                    if( device.name != null ) {
+                        DeviceItem(
+                            device = device,
+                            onDeviceClick = {
+                                viewModel.connectToDevice(device)
+                                navController.navigate(LitonScreen.DeviceInfo.name)
+                            }
+                        )
+                        HorizontalDivider(thickness = 2.dp, color = Color.Red)
                     }
                 }
-
-      //  }
-
-        // 錯誤顯示
-        uiState.error?.let { error ->
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
-            ) {
-                Text(
-                    text = error,
-                    modifier = Modifier.padding(16.dp),
-                    color = MaterialTheme.colorScheme.onErrorContainer
-                )
+            }
+            // 錯誤顯示
+            uiState.error?.let { error ->
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                ) {
+                    Text(
+                        text = error,
+                        modifier = Modifier.padding(16.dp),
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
             }
         }
+        }
+
     }
 }
 @Composable

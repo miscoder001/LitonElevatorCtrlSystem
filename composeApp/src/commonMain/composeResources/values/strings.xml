@@ -5,6 +5,8 @@
     <string name="bluetooth_screen">藍芽清單</string>
     <string name="liton_elevator_setup">利通電梯配置</string>
     <string name="liton_realtime_monitoring">電梯即時監控</string>
+    <string name="bluetooth_device_detail">裝置服務明細</string>
+    <string name="characteristic">服務特徵資訊</string>
     <string name="demo_screen">示範設定</string>
     <string name="order_cupcakes">Order Cupcakes</string>
     <string name="one_cupcake">One Cupcake</string>

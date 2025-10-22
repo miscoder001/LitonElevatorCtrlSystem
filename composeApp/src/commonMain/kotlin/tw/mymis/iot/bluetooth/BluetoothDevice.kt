@@ -5,5 +5,6 @@ data class BluetoothDevice(
     val name: String?,
     val address: String,
     val isConnected: Boolean = false,
-    val rssi: Int? = null
+    val rssi: Int? = null,
+    val services: MutableList<String> = mutableListOf()
 )

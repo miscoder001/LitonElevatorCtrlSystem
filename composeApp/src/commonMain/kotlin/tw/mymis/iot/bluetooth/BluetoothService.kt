@@ -9,9 +9,12 @@ interface BluetoothService {
     fun stopDeviceDiscovery()
     suspend fun connectToDevice(device: BluetoothDevice): Boolean
     suspend fun disconnectFromDevice()
+    suspend fun listServiceFromDevice()
+    suspend fun listCharacteristicsFromDevice()
     fun sendData(data: ByteArray): Boolean
     fun receiveData(): Flow<ByteArray>
     fun getConnectionState(): Flow<ConnectionState>
+    fun getCharacteristicByUUID(uuidString: String)
 }
 
 enum class ConnectionState {
