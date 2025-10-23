@@ -259,8 +259,8 @@ class BluetoothServiceIOS(viewModel: LitonViewModel) : BluetoothService {
         var cbSvcObj:CBServiceObject? = null
         if( cbServices.containsKey(uuidString)) {
             cbSvcObj = cbServices.get(uuidString)
-//            println("服務： ${cbSvcObj?.cbService?.UUID?.UUIDString}")
-//            println("特徵： ${cbSvcObj?.cbChars}")
+            println("服務： ${cbSvcObj?.cbService?.UUID?.UUIDString}")
+            println("特徵： ${cbSvcObj?.cbChars}")
             val cbService = cbSvcObj?.cbService
             val cbChara: CBCharacteristic = cbSvcObj!!.cbChars.get(0)
             peripheral?.readValueForCharacteristic(cbChara, )

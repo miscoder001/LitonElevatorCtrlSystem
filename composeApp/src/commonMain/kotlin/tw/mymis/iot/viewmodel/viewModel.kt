@@ -1,6 +1,7 @@
 package tw.mymis.iot.viewmodel
 
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -9,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 import kotlinx.coroutines.launch
 import tw.mymis.iot.bluetooth.BluetoothDevice
@@ -39,6 +41,9 @@ class LitonViewModel : ViewModel() {
     init {
         observeConnectionState()
     }
+
+    private var _receivedData: MutableStateFlow<ByteArray>? = null
+    private val receiveData2: StateFlow<ByteArray> = bluetoothService.receiveData() as MutableStateFlow<ByteArray>
 
     fun cleanDevices() {
         // val cleanDevice : List<BluetoothDevice> = emptyList()
@@ -80,6 +85,14 @@ class LitonViewModel : ViewModel() {
             } else {
                 _uiState.value = _uiState.value.copy()
                 bluetoothDevice = device
+                //
+                _receivedData = bluetoothService.receiveData().collect {
+                        data ->
+                    data?.let { emit(it) }
+                }
+
+                }
+
             }
         }
     }
