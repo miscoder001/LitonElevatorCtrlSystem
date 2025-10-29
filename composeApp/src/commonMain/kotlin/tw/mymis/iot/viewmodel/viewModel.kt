@@ -43,8 +43,9 @@ class LitonViewModel : ViewModel() {
     }
 
     private var _receivedData: MutableStateFlow<ByteArray>? = null
-    private val receiveData2: StateFlow<ByteArray> = bluetoothService.receiveData() as MutableStateFlow<ByteArray>
+   // private val receiveData2: StateFlow<ByteArray> = bluetoothService.receiveData() as MutableStateFlow<ByteArray>
 
+    var _receivedData2: Flow<ByteArray>? = null
     fun cleanDevices() {
         // val cleanDevice : List<BluetoothDevice> = emptyList()
         _uiState.value.copy( discoveredDevices = emptyList())
@@ -85,13 +86,11 @@ class LitonViewModel : ViewModel() {
             } else {
                 _uiState.value = _uiState.value.copy()
                 bluetoothDevice = device
-                //
-                _receivedData = bluetoothService.receiveData().collect {
-                        data ->
-                    data?.let { emit(it) }
-                }
-
-                }
+                _receivedData2= bluetoothService.receiveData()
+//                _receivedData2 = bluetoothService.receiveData().collect {
+//                        data ->
+//                    data?.let { emit(it) }
+//                }
 
             }
         }

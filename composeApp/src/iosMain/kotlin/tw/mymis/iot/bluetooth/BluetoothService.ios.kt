@@ -7,6 +7,7 @@ import kotlinx.cinterop.refTo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import platform.CoreBluetooth.*
 import platform.Foundation.*
 import platform.darwin.NSObject
@@ -29,6 +30,7 @@ class BluetoothServiceIOS(viewModel: LitonViewModel) : BluetoothService {
 
     var cbServices: MutableMap<String, CBServiceObject> = mutableMapOf()
 
+    // CentralManager Delegate Protocol
     private val centralDelegate = object : NSObject(), CBCentralManagerDelegateProtocol {
 
         // 只要 CentralManager 的狀態異動 便會呼叫此method
@@ -91,6 +93,7 @@ class BluetoothServiceIOS(viewModel: LitonViewModel) : BluetoothService {
         }
     }
 
+    // Peripheral Delegate Protocol
     @OptIn(ExperimentalForeignApi::class)
     private val peripheralDelegate = object : NSObject(), CBPeripheralDelegateProtocol {
 
@@ -153,13 +156,12 @@ class BluetoothServiceIOS(viewModel: LitonViewModel) : BluetoothService {
             }
             println("資料長度： ${_receivedData.value?.size}")
             println("資料內容： ${_receivedData.value?.toHexString()}")
-            val value = (_receivedData.value?.get(0) )
-            viewModel.batteryLevel.value = value!!.toInt()
 
         }
 
     }
 
+    // BluetoothService Initialization
     init {
         centralManager = CBCentralManager(centralDelegate, null)
     }
@@ -244,12 +246,16 @@ class BluetoothServiceIOS(viewModel: LitonViewModel) : BluetoothService {
     }
 
     override fun receiveData(): Flow<ByteArray> = flow {
-
-        _receivedData.collect { data ->
-            data?.let { emit(it) }
+        if( _receivedData.value != null && _receivedData.value!!.isNotEmpty()) {
+            _receivedData.collect { data ->
+                data?.let { emit(it) }
+            }
+        } else {
+            flowOf(byteArrayOf(0x00.toByte()))
         }
 
     }
+
 
     override fun getConnectionState(): Flow<ConnectionState> {
         return _connectionState

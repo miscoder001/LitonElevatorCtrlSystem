@@ -17,26 +17,31 @@ import androidx.navigation.NavHostController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
+import litonelevatorctrlsystem.composeapp.generated.resources.Res
 import tw.mymis.iot.viewmodel.LitonViewModel
 
 
 @Composable
 fun CharacteristicsScreen(hostController: NavHostController, viewModel: LitonViewModel) {
     val uiState by viewModel.uiState.collectAsState()
+    val message = viewModel._receivedData2!!.collectAsState(byteArrayOf(0x00.toByte()))
     var charData: Flow<ByteArray>
     val count = mutableStateOf(0)
 
     LaunchedEffect(Unit) {
-        viewModel.fetchCharacteristicByUUID(viewModel.serviceUUID.value)
-        delay(3000)
-        viewModel.processCharData().collect {
-            data ->
-            println( data.size)
-        }
+//        viewModel.fetchCharacteristicByUUID(viewModel.serviceUUID.value)
+//        delay(3000)
+//        viewModel.processCharData().collect {
+//            data ->
+//            println( data.size)
+//        }
+
     }
 
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text( text = "該藍牙裝置目前電池容量：${viewModel.batteryLevel.value}", fontSize = 20.sp)
+       Text( text = "message:${message.value.toHexString()}", fontSize = 16.sp)
+        Text( text = "string: ${message.value.toString()}", fontSize =  16.sp)
+        Text( text = "string2: ${message.value.toHexString().toString()}", fontSize = 16.sp)
     }
 }
